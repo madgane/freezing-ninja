@@ -1,0 +1,37 @@
+
+\begin{figure}[h]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\me{N_T} & Number of transmit antenna \\
+\me{N_R} & Number of receive antenna \\
+\me{N_B} & Number of \acp{BS} \\
+\me{N} & Number of sub-channels \\
+\me{K} & Number of users present in the system \\
+\me{Q_k} & Number of backlogged packets for user \me{k} \\
+\me{A_k} & Instantaneous arrival of user \me{k} \\
+\me{\mvec{H}{b,k,n} \in \mathbb{C}^{N_R \times N_T}} & Channel between \ac{BS} \me{b} and user \me{k} for sub-channel \me{n} \\
+\me{\mvec{m}{l,k,n} \in \mathbb{C}^{N_T \times L}} & Transmit precoder for user \me{k} on the \me{\ith{n}} sub-channel \\
+\me{\mvec{w}{l,k,n} \in \mathbb{C}^{N_R \times L}} & Receive equalizer for user \me{k} on the \me{\ith{n}} sub-channel \\
+\me{\mathcal{B}} & Set of co-ordinating \acp{BS} \\
+\me{\mathcal{U}_b} & Set of users belonging to \ac{BS} b \\
+\me{N_{\mathrm{OTA}}} & Total number of \ac{OTA} signaling exchanges between \acp{BS} and users \\
+\me{N_{\mathrm{BH}}} & Total number of back-haul signaling performed between the coordinating \acp{BS} \\
+\me{\kappa = {N_F} / {N_{\mathrm{OTA}}}} & Denotes the efficiency of the \ac{OTA} transmissions to the gain obtained \\
+\me{N_G} & Number of transmission slots available to transmit the data before the next arrivals \\
+\hline
+\end{tabular}
+\end{figure}
+
+Using above notations, received signal on the \me{\ith{l}} spatial stream on the \me{\ith{n}} sub-channel for user \me{k} is given by
+\begin{equation}\label{eqn-1}
+\hat{d}_{l,k,n} = \mvec{w}{l,k,n}^\herm \mvec{H}{b_k,k,n} \,\mvec{m}{l,k,n} d_{l,k,n} + \mvec{w}{l,k,n}^\herm \sum_{i \in \mc{U} \backslash \set{k}} \mvec{H}{b_i,k,n} \sum_{j = 1}^L \mvec{m}{j,i,n}d_{j,i,n} + \mvec{w}{l,k,n}^\herm \mvec{n}{k,n}.
+\end{equation}
+The received \ac{SINR} of the corresponding spatial data is given as
+\begin{equation}\label{eq:SINR}
+\gamma_{l,k,n} = \dfrac{\left |\mvec{w}{l,k,n}^\herm \, \mvec{H}{b_k,k,n} \, \mvec{m}{l,k,n} \right |^2}{\enoise + \sum_{(j,i) \neq (l,k)} |\mvec{w}{l,k,n}^\herm \mvec{H}{b_i,k,n} \mvec{m}{j,i,n} |^2}
+\end{equation}
+where \me{\enoise = N_0 \, \trace (\mvec{w}{l,k,n} \mbf{w}_{l,k,n}^\herm)} denotes the equivalent noise variance. The achievable rate of user \me{k} on the \me{\ith{l}} spatial stream and the \me{\ith{n}} sub-channel is given by 
+\begin{equation}
+t_{l,k,n} = \log_2 (1 + \gamma_{l,k,n}).
+\end{equation}

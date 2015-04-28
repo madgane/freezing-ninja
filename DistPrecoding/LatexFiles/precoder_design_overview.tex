@@ -1,0 +1,8 @@
+
+The precoders can be designed by the combination of back-haul iterations among the coordinating \acp{BS} and by \ac{OTA} exchanges between the \acp{BS} and the users present in the system. The total number of back-haul iterations and the \ac{OTA} exchanges are represented by \eqn{N_{\mathrm{BH}}} and \eqn{N_{\mathrm{OTA}}}. In order to account for the resource utilization by the \ac{OTA} exchanges, \me{\kappa} is used as the efficiency of resource usage for the actual data transmission. The objective of the problem is to minimize the total number of queued packets of each users in the system at each instant in a distributed manner, which is given by
+\begin{equation}
+\underset{t_{l,k,n}}{\text{minimize}} \quad \sum_{k \in \mathcal{U}} \left | Q_k - \kappa \sum_{n = 0}^{N-1} \sum_{l = 0}^{L-1} t_{l,k,n} \right |^q
+\end{equation}
+for a fixed \me{\kappa}. Since the problem is nonconvex, we use \ac{SCA} to solve it in an iterative manner for a fixed number of iterations. At each instant, the starting point of the iterative procedure is fixed with the operating point from the previous transmission instant. It provides improved speed of convergence in the iterative procedure.
+
+The objective is to design the precoders in a distributed approach with minimal number of information exchanges between the coordinating \acp{BS} and the users. Since the frequency of arrival packets is larger than the physical layer transmissions, we assume \me{N_G} transmission slots are available to empty to queues of all users before the next arrival packets from the higher layers.
