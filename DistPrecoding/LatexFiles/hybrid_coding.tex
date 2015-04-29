@@ -1,0 +1,11 @@
+In this approach, initialization of the resources are performed for multiple time slots, in particular \me{N_G}, which is then used as the initial operating for the forthcoming transmissions with the actual channel. It reduces the overhead involved in the iterative procedure and therefore requires less number of iterations for the precoder convergence. The problem can be given as
+\begin{IEEEeqnarray}{RCL}
+\underset{\substack{\gamma_{l,k,n}, \mvec{m}{l,k,n}^{(i)} \\ \beta_{l,k,n}, b_k^{(i)}}}{\text{minimize}} &\quad& \sum_{k \in \mc{U}} \left | b_k^{(N_G - 1)} \right |^q  \\
+\text{subject to} &\quad& \sum_{n = 1}^{N-1} \sum_{k \in \mathcal{U}_b} \sum_{l=1}^{L-1} \trace \, (\mvec{m}{l,k,n} \mvec{m}{l,k,n}^\herm) \leq P_{{\max}} \eqsub \label{power_update} \\
+&\quad& b^{(i-1)}_k - \mu_k^{(i)} \sum_{n = 0}^{N-1} \sum_{l = 0}^{L-1} t^{(i)}_{l,k,n} \leq b^{(i)}_k \\
+&\quad& \sum_{\substack{\{\bar{l},\bar{k}\}\neq\{l,k\} \\ \forall \bar{k} \in \mc{U}_b}} |\mvec{w}{l,k,n}^{\herm (i)} \mvec{H}{b,k,n}^{(0)} \mvec{m}{\bar{l},\bar{k},n}^{(i)} |^2 + \enoise \leq \beta_{l,k,n} \eqspace \eqsub \\
+&\quad& \mathrm{linearize} \text{ SINR}
+\end{IEEEeqnarray}
+where \me{b^{(-1)}_k = Q_k} and \me{\mu_k \leq 1} is a measure of the Doppler associated with user \me{k}. In the above formulation, \me{\mu_k^{(i)}} denotes the degradation in the achievable rate corresponding to the change in the channel gain. Once the precoders are designed, the users are preallocated over the time as well with the channel knowledge at the \me{\ith{0}} instant, where the user arrivals are happening.
+
+Using the predetermined precoders from the above centralized problem as the initialization points for the \ac{SCA} operating point, the current beamformers are updated through limited \ac{OTA} signaling. 

@@ -1,15 +1,17 @@
 In this approach, the precoders are designed iteratively by performing \ac{OTA} exchanges between the users and the coordinating \acp{BS} in the system. It is performed by the following approach. Each \ac{BS} will design the transmit precoders and broadcast to all users in the system by the precoded downlink pilots as
 where the initial transmit beamformers \me{\mvec{m}{l,k,n}^{(0)}} and the receive equalizers \me{\mvec{w}{l,k,n}^{(0)}} are initialized with the operating point of the previous transmission. 
 \begin{equation}
-\mvec{m}{l,k,n}^{(i)} = \Big ( \sum_{x \in \mc{U}} \sum_{y=1}^L \alpha_{y,x,n}^{(i-1)} \mvec{H}{b_k,x,n}^\herm \mvec{w}{y,x,n}^{(i-1)} \mvec{w}{y,x,n}^{\herm \, {(i-1)}} \mvec{H}{b_k,x,n} + \delta_b \mbf{I}_{N_T} \Big )^{-1} \alpha^{(i-1)}_{l,k,n} \mvec{H}{b_k,k,n}^\herm \mvec{w}{l,k,n}^{(i-1)}
+\mvec{m}{l,k,n}^{(j)} = \Big ( \sum_{x \in \mc{U}} \sum_{y=1}^L \alpha_{y,x,n}^{(j-1)} \mvec{H}{b_k,x,n}^\herm \mvec{w}{y,x,n}^{(j-1)} \mvec{w}{y,x,n}^{\herm \, {(j-1)}} \mvec{H}{b_k,x,n} + \delta_b \mbf{I}_{N_T} \Big )^{-1} \alpha^{(j-1)}_{l,k,n} \mvec{H}{b_k,k,n}^\herm \mvec{w}{l,k,n}^{(j-1)}
 \end{equation}
 
 Upon receiving the downlink pilots, each user evaluate equivalent downlink channel \me{\mvec{H}{b,k} \mvec{m}{l,\bar{k},n}} \eqn{\forall \bar{k}\in \mathcal{U}}. It is then used to calculate the effective receive equalizers using
 \begin{IEEEeqnarray}{RCL}
-\mvec{w}{l,k,n}^{(i)} &=& \Big ( \sum_{x\in\mc{U}}\sum_{y=1}^L \mvec{H}{b_x,k,n} \mvec{m}{y,x,n}^{(i)} \mvec{m}{y,x,n}^{\herm \, (i)} \mvec{H}{b_{x},k,n}^\herm + \mathbf{I}_{N_R} \Big ) ^{-1} \; \mvec{H}{b_k,k,n} \; \mvec{m}{l,k,n}^{(i)} \\
-\epsilon_{l,k,n}^{(i)} &=& \left | 1 - \mvec{w}{l,k,n}^{\herm \, (i)} \mvec{H}{b_k,k,n} \mvec{m}{l,k,n}^{(i)} \right |^2 + N_0 \, \|\mvec{w}{l,k,n}^{(i)}\|^2 + \sum_{\mathclap{(x,y) \neq (l,k)}} \left | \mvec{w}{l,k,n}^{\mathrm{H} \, (i)} \mvec{H}{b_y,k,n} \mvec{m}{x,y,n}^{(i)} \right |^2 \IEEEyessubnumber \label{kkt-mse-4.4} \\
-t_{l,k,n}^{(i)} &=&  -\log_2(\epsilon_{l,k,n}^{(i-1)}) - \tfrac{\left ( \epsilon_{l,k,n}^{(i)} - \epsilon_{l,k,n}^{(i-1)} \right ) }{\log(2) \, \epsilon_{l,k,n}^{(i-1)}} \IEEEyessubnumber \label{kkt-mse-4.5} \\
-\sigma_{l,k,n}^{(i)} &=& \Big [\tfrac{a_k \, q}{\log(2)}  \, \Big (Q_k - \sum_{n = 1}^N \sum_{l=1}^L t_{l,k,n}^{(i)} \Big )^{(q-1)}\Big ]^+  \IEEEyessubnumber \label{kkt-mse-4.2} \\
-\alpha^{(i)}_{l,k,n} &=& \alpha^{(i-1)}_{l,k,n} + \rho \left ( \tfrac{\sigma_{l,k,n}^{(i)}}{\epsilon_{l,k,n}^{(i)}} - \alpha^{(i-1)}_{l,k,n} \right ) \IEEEyessubnumber \label{kkt-mse-4.1}
+\mvec{w}{l,k,n}^{(j)} &=& \Big ( \sum_{x\in\mc{U}}\sum_{y=1}^L \mvec{H}{b_x,k,n} \mvec{m}{y,x,n}^{(j)} \mvec{m}{y,x,n}^{\herm \, (j)} \mvec{H}{b_{x},k,n}^\herm + \mathbf{I}_{N_R} \Big ) ^{-1} \; \mvec{H}{b_k,k,n} \; \mvec{m}{l,k,n}^{(j)} \\
+\epsilon_{l,k,n}^{(j)} &=& \left | 1 - \mvec{w}{l,k,n}^{\herm \, (j)} \mvec{H}{b_k,k,n} \mvec{m}{l,k,n}^{(j)} \right |^2 + N_0 \, \|\mvec{w}{l,k,n}^{(j)}\|^2 + \sum_{\mathclap{(x,y) \neq (l,k)}} \left | \mvec{w}{l,k,n}^{\mathrm{H} \, (j)} \mvec{H}{b_y,k,n} \mvec{m}{x,y,n}^{(j)} \right |^2 \IEEEyessubnumber \label{kkt-mse-4.4} \\
+t_{l,k,n}^{(j)} &=&  -\log_2(\epsilon_{l,k,n}^{(j-1)}) - \tfrac{\left ( \epsilon_{l,k,n}^{(j)} - \epsilon_{l,k,n}^{(j-1)} \right ) }{\log(2) \, \epsilon_{l,k,n}^{(j-1)}} \IEEEyessubnumber \label{kkt-mse-4.5} \\
+\sigma_{l,k,n}^{(j)} &=& \Big [\tfrac{a_k \, q}{\log(2)}  \, \Big (Q_k - \sum_{n = 1}^N \sum_{l=1}^L t_{l,k,n}^{(j)} \Big )^{(q-1)}\Big ]^+  \IEEEyessubnumber \label{kkt-mse-4.2} \\
+\alpha^{(j)}_{l,k,n} &=& \alpha^{(j-1)}_{l,k,n} + \rho \left ( \tfrac{\sigma_{l,k,n}^{(j)}}{\epsilon_{l,k,n}^{(j)}} - \alpha^{(j-1)}_{l,k,n} \right ) \IEEEyessubnumber \label{kkt-mse-4.1}
 \end{IEEEeqnarray}
-With the updated receive equalizer, the uplink precoded pilots are transmitted from all users to inform the effective channel \me{\sqrt{\alpha_{l,k,n}^{(i)}} \mvec{H}{b,k,n}^\tran \mvec{w}{l,k,n}^\ast} to all \acp{BS} in the system to obtain the next set of transmit beamformers.
+With the updated receive equalizer, the uplink precoded pilots are transmitted from all users to inform the effective channel \me{\sqrt{\alpha_{l,k,n}^{(j)}} \mvec{H}{b,k,n}^\tran \mvec{w}{l,k,n}^\ast} to all \acp{BS} in the system to obtain the next set of transmit beamformers.
+
+To reduce the number of \ac{OTA} exchanges in the system, we limit the iteration count to a fixed value \me{N_{\mathrm{OTA}}}. The \ac{SCA} operating points are initialized with the operating point obtained from the previous transmission after \me{N_{\mathrm{OTA}}} iterations.

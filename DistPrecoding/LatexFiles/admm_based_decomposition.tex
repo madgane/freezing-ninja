@@ -1,0 +1,24 @@
+The \ac{ADMM} based approach uses traditional decomposition scheme without \ac{OTA} signaling requirement. The information is exchanged between the coordinating \acp{BS} in \me{\mathcal{B}} to update the dual and the coupling variables. The \ac{BS} specific subproblem is given by
+\begin{IEEEeqnarray}{rCl} \label{eqn-dual-3}\allowdisplaybreaks
+	\underset{\substack{\gamma_{l,k,n}, \mvec{m}{l,k,n} \\ \beta_{l,k,n}, \mbfa{\zeta}_b}}{\text{minimize}} &\quad& \| \tilde{\mbf{v}}_{b} \|_q + \mbfa{\nu}^{(j)\,\tran}_b  \left ( \mbfa{\zeta}_b - \mbfa{\zeta}^{(j)}_b \right ) +  \frac{\rho}{2} \left \| \mbfa{\zeta}_b - \mbfa{\zeta}^{(j)}_b \right \|^2 \eqsub \eqspace \\
+	\text{subject to} &\quad& \sum_{n = 1}^{N-1} \sum_{k \in \mathcal{U}_b} \sum_{l=1}^{L-1} \trace \, (\mvec{m}{l,k,n} \mvec{m}{l,k,n}^\herm) \leq P_{{\max}} \eqsub \label{power_update} \\
+	&\quad&\sum_{\bar{b} \in \bar{\mc{B}}_b} \zeta_{l,k,n,\bar{b}} + \sum_{\mathclap{\{\bar{l},\bar{k}\}\neq\{l,k\}}} |\mvec{w}{l,k,n}^\herm \mvec{H}{b,k,n} \mvec{m}{\bar{l},\bar{k},n} |^2 + \enoise \leq \beta_{l,k,n} \eqspace \eqsub \\
+	&\quad& \sum_{k \in \mc{U}_b} \sum_{l=1}^L |\mvec{w}{\bar{l},\bar{k},n}^\herm \mvec{H}{b,\bar{k},n} \mvec{m}{l,k,n} |^2 \leq \zeta_{\bar{l},\bar{k},n,b} \; \forall \bar{k} \in \bar{\mc{U}}_b \; \forall n \eqsub \\
+	&\quad& \mathrm{linearize} \text{ SINR}
+\end{IEEEeqnarray}
+where \me{\mbfa{\zeta}^{(j)}_b} denotes the interference vector updated from the earlier iteration and \me{\mbfa{\nu}^{(j)}_b} represents the dual vector corresponding to the equality constraint at the \me{\ith{i}} iteration as
+\begin{equation} \label{const-admm1}
+	\mbfa{\zeta}_b = \mbfa{\zeta}^{(j)}_b.
+\end{equation}
+
+Upon solving \eqref{eqn-dual-3} for \me{\mbfa{\zeta}_b \forall b} in the \me{\ith{i}} iteration, the next iterate is updated by exchanging the corresponding interference terms between two \acp{BS} \me{b} and \me{b_k} as
+\begin{equation}
+	\mbfa{\zeta}_{b_k}(b)^{(j+1)} = \mbfa{\zeta}_{b}(b_k)^{(j+1)} = \frac{\mbfa{\zeta}_{b}(b_k) + \mbfa{\zeta}_{b_k}(b)}{2}.
+	\label{if-sg-update}
+\end{equation}
+The dual vector for the next iteration is updated by using the subgradient search to maximize the dual objective as
+\begin{equation}
+	\mbfa{\nu}_b^{(j+1)} = \mbfa{\nu}_b^{(j)} + \rho \left (\mbfa{\zeta}_b - \mbfa{\zeta}_b^{(j+1)} \right )
+	\label{dual-sg-update}
+\end{equation}
+where step size parameter \me{\rho} is chosen to depend on the system model under consideration. The convergence rate of the distributed algorithm is susceptible to the choice of step size parameter \me{\rho}. For our simulation models, we consider step size parameter \me{\rho=2}. The above iteration is performed until convergence or for certain accuracy in the variation of the objective value between two consecutive updates. 
