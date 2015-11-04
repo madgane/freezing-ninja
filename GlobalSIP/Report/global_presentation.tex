@@ -144,89 +144,57 @@
 
 \begin{frame}{Overview of TIC6636K2H Eight Core SoC}
 	\begin{itemize}
-		\item ZC702 is a SoC, which includes \redtxt{dual core ARM Cortex A9 and FPGA}
-		\item It supports AMBA-AXI interface between processing subsystem (PS) and programming logic (PL)
-		\item \blutxt{Clock of ARM is $667$ MHz and PL operates at $100$ MHz}
-		\item 1GB DDR RAM is accessible by both subsystems through AMBA-AXI
-		\item Modes of communication between PS and PL can be
+		\item Four ARM Cortex A15 operating at \@ \eqn{1.4}GHz
+		\item Eight C66x CorePacs DSP Core Subsystems \@ \eqn{1.2}GHz
+		\item 1024K Byte Local L2 Per CorePac
+		\item 6 MB MSM SRAM Memory Shared by DSP CorePacs and ARM CorePac
+		\item TeraNet Fabric interconnect between core subsystems and peripherals
+		\item DDR3 memory interface
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Partitioning of Algorithm}
+	\begin{itemize}
+		\item Computationally, SVD is the most demanding operation
+		\item SVD is performed by \blutxt{repeated QR factorization} (16 iterations)
+		\item In order to utilize the SoC efficiently, \redtxt{SVD is shared among eight C66x cores}
+		\item SVD processing begins with a \blutxt{chip level interrupt controller (CIC) interrupt} from Core(0)
+		\item Channel matrices are \gretxt{stored in MSM SRAM memory}, which is accessible to all C66x cores
+		\item Upon completion, Core(0) carries out scheduler design until completion
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Implementation of Scheduler Algorithm}
+	\begin{itemize}
+		\item Each core runs \blutxt{separate copy of SYS-BIOS}
+		\item Inter core communication is facilitated using MCSDK 3.0 software stack
+		\item Storage address of the channel buffer in MSM SRAM is fixed across cores using \gretxt{\textrm{\#pragma location}}
+		\item \redtxt{Avoids the usage of \textit{SharedMem} and \textit{Notify} modules} to attain the same
+		\item \blutxt{\textit{IPC} module is used to synchronize} the cores upon {BIOS\_Start()} function call
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Core(0) Implementation}
+	\begin{itemize}
+		\item \redtxt{Signed Q1.15 format} for real and imaginary entries
+		\item \gretxt{CIC interrupt from Core (0)} is used to notify the \blutxt{availability of channel buffer to other cores}
+		\item \redtxt{Cache \textit{write-back}} is performed upon completing SVD processing by all cores
+		\item Upon completion, \gretxt{Core (0) proceeds with scheduling algorithm processing}
+		\item However, in a dynamic scenario, \blutxt{CIC interrupt can be used to notify the completion from other cores}
+		\item Number of SVD's per core - 
 		\begin{itemize}
-			\item B-RAM (block RAM)
-			\item \blutxt{M\_AXI (burst transfer mode)}
-			\item S\_AXI (streaming mode of transfer)
-			\item S\_AXI\_Lite (address followed by data)
+			\item Core(0) - \eqn{\left \lfloor \dfrac{K}{N_C} \right \rfloor + \left ( K - \left \lfloor \dfrac{K}{N_C} \right \rfloor \times N_C \right ) }
+			\item Other cores - \eqn{\left \lfloor \dfrac{K}{N_C} \right \rfloor}
 		\end{itemize}
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Algorithm Partitioning}
-	\begin{itemize}
-		\item Computationally, SVD is the most demanding operation
-		\item SVD is performed by repeated QR factorization (16 iterations)
-		\item In order to utilize the SoC efficiently, \redtxt{SVD is performed in PL}
-		\item Since PL operates at \eqn{100} MHz, we require parallel SVD operations to increase throughput
-		\item With the available resources, only \blutxt{\eqn{5} SVD operations can be performed in parallel}
-		\item Interface between \blutxt{PL and DDR is with \eqn{HP0} interconnect} - high performance AXI\_M mode
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{FPGA Resource Utilization for $5$ SVD's}
-	\linespread{1.5}
-	\begin{table} 
-		 \begin{center} \small \begin{tabular}{|m{1.5in} m{1.5in}|} \hline
-				\alert{Resource} 	&  	\alert{Utilization} \% \\ 
-				\hline 
-				Flip Flops 	& 	39.4 \\
-				LUT 		& 	72.6 \\
-				Memory LUT 	& 	6.2 \\
-				BRAM 		& 	60.7 \\
-				\blutxt{DSP48} 		& 	\blutxt{86.4 (limiting resource)}\\
-				BUFG 		& 	3.1 \\ 
-				\hline
-			\end{tabular} \label{tbl-utilization} 
-			\end{center} 
-			\end{table}
-\end{frame}
-
 \begin{frame}
-\begin{figure}
-	\centering
-	\includegraphics[trim=0in 2.25in 0in 1.0in,width=\columnwidth]{overall_scheduling}
-	\caption{Task scheduling over \eqn{N_C = 8} cores.}
-\end{figure}
-\end{frame}
-
-\subsection{PL-PS Implementation Specifications}
-
-\begin{frame}{Why Scheduler Implementation on ARM}
-	\begin{itemize}
-		\item SVD is highly complex compared to scheduling complexity
-		\item \blutxt{Scheduling is sequential}, \textit{i.e.}, users are selected based on previous chosen users
-		\item However, metric calculation for all users and max search over all metrics can be done in parallel
-		\item To do parallel implementation on PL, \redtxt{it requires more resources}, which we are lacking
-		\item Similar parallelization can also be performed using \blutxt{NEON vector floating point (VFP) co-processor on ARM}
-		\item SVD is required \blutxt{only when channel changes}, whereas \redtxt{scheduling is need on per sub-frame} basis
-	\end{itemize}
-\end{frame}
-
-
-\begin{frame}{Programming Logic Implementation}
-	\begin{itemize}
-		\item Real and complex entries - \redtxt{Q3.15 signed format} 
-		\item Dynamic range is improved by storing intermediate values in Q9.15
-		\item Using above Q format, each \blutxt{MAC requires one {DSP48} unit}, \textit{i.e.} \eqn{25 \times 18} multiplication
-		\item S\_AXI\_Lite is used for control command from PS \eqn{\to} PL, \blutxt{HP0 dedicated lane is used for fetching} from DDR
-		\item Computes SVD for \redtxt{\eqn{5} channel matrices in parallel} to improve throughput
-		\item Upon completion, an \blutxt{interrupt is sent to PS}
-	\end{itemize}
-\end{frame}
-
-\begin{frame}{Processing Subsystem Implementation}
-	\begin{itemize}
-		\item \redtxt{Signed Q1.15 format} is used to represent real and imaginary entries
-		\item Upon availability of channel, \blutxt{S\_AXI\_Lite control is used to interrupt PL for SVD}
-		\item On obtaining interrupt from PL, a single ARM core is used to perform scheduling
-		\item If there are multiple sub-channels, it can be performed over other ARM cores too
-	\end{itemize}
+	\begin{figure}
+		\centering
+		\includegraphics[trim=0in 2.25in 0in 1.0in,width=\columnwidth]{overall_scheduling}
+		\caption{Task scheduling over \eqn{N_C = 8} cores.}
+	\end{figure}
 \end{frame}
 
 \subsection{Complexity Analysis}
@@ -251,11 +219,12 @@
 
 \begin{frame}{Conclusion from Implementation Results}
 	\begin{itemize}
-		\item SVD is the computationally expensive part of scheduling
-		\item However, due to channel coherency, SVD computation is not per subframe resolution
-		\item Current implementation can perform \eqn{4,375} SVD's per second of \eqn{8 \times 4} matrix
-		\item Similarly it can handle \eqn{33,760} SVD's per second of \eqn{4 \times 2} matrix
-		\item All scheduling schemes satisfy real-time requirement of \eqn{1}msec with \eqn{4 \times 2} system with \eqn{N_K = 50} users
+		\item \gretxt{Current design can handle all scheduling algorithms} within \eqn{0.5} msec duration
+		\item Moreover, with \blutxt{8 parallel cores}, it can \gretxt{support \eqn{8} scheduling blocks (SBs)} within \eqn{0.5} msec
+		\item However, the complexity is mainly attributed by the SVD processing
+		\item With current implementation, it can \blutxt{support the MIMO configuration of \eqn{8 \times 2} system for \eqn{K = 100} users}
+		\item It is valid only \redtxt{if the channel changes onces in every radio frame} of \eqn{10} msec duration
+		\item In \eqn{4 \times 2} configuration, current implementation supports \eqn{2} SBs using earlier assumption
 	\end{itemize}
 \end{frame}
 
@@ -264,11 +233,11 @@
 
 \begin{frame}{Conclusions}
 \begin{itemize}
-\item We studied the implementation of different state-of-the-art MU-MIMO scheduling algorithms on ZYNQ ZC702 SoC
+\item We studied the implementation of different state-of-the-art MU-MIMO scheduling algorithms on TIC6636K2H
 \item Complexity is mainly attributed to SVD decomposition of channel matrices
-\item Using parallel implementation, the overall throughput of SVD computation is improved \eqn{\approx 4.7} times \redtxt{(loss is due to memory bottleneck)}
+\item Using parallel implementation, current design can support \eqn{100} SVD of \eqn{8 \times 2} matrices in \eqn{6.055} msec
 \item We have demonstrated that with the current implementation, \blutxt{all scheduling schemes meet the real-time requirements}
-\item As a comparative study, implementing above algorithms on \blutxt{TI C66K2H12 octa-core SoC}, supports up to \redtxt{$100$ users} for \eqn{4 \times 4} MIMO system (\gretxt{to appear in GlobalSIP 2015})
+\item Even though we considered only single SB, the above implementation is scalable.
 \end{itemize}
 \end{frame}
 
