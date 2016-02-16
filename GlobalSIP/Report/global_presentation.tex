@@ -92,32 +92,6 @@
 \end{itemize}
 \end{frame}
 
-\subsection{Successive Projections}
-
-\begin{frame}{Successive Projections\eqn{^\dagger}}
-\begin{itemize}
-\item Based on \redtxt{Gram-Schmidt Orthogonalization} Procedure
-\item In each iteration, user channel vectors are projected on to the subspace orthogonal to the span of channel vectors already chosen
-\item Upon \blutxt{projecting on to the orthogonal subspace}, resulting vector with maximum norm is chosen as the candidate user
-\[\mbf{N}(\mathcal{A}) = \mbf{I}_{N_T} - \mbf{F} \left (\mbf{F}^\herm \mbf{F} \right )^{-1} \mbf{F}^\herm\]
-\item where \eqn{\mbf{F}} is the matrix formed by stacking channel vector of already chosen users in \eqn{\mc{A}}
-\end{itemize}
-\eqn{^\dagger}\scriptsize{T. Yoo and A. Goldsmith, "{On the Optimality of Multi-Antenna Broadcast Scheduling using zero-forcing Beamforming},” in \emph{IEEE J. Sel. Areas Commun.}, vol. 24, no. 3. IEEE, march 2006.}
-\end{frame}
-
-\subsection{Product of Independent Projections}
-
-\begin{frame}{Product of Independent Projections (PIPD)\eqn{^\dagger}}
-	\begin{itemize}
-	\item As compared to the subspace projection in previous algorithm, \blutxt{vector projections} are considered
-	\item Each user channel is projected on to unit vector in the direction of already chosen users channel
-	\item Selection is based on the product of independent vector projections
-	\item Performs significantly closer to successive projections method
-	\item Due to vector projections, inverse calculation is not required - \redtxt{low complexity}
-	\end{itemize}
-\eqn{^\dagger}\scriptsize{Venkatraman, G., Tolli, A., Janhunen, J., and Juntti, M. "Low Complexity Multi-User MIMO Scheduling for Weighted Sum Rate Maximization", in \emph{Proc. of European Signal Process. Conference (EUSIPCO)}, pp. 820--824, 2013}
-\end{frame}
-
 \subsection{Block Diagram \& Performance Figure}
 
 \begin{landscape}
@@ -144,10 +118,10 @@
 
 \begin{frame}{Overview of TIC6636K2H Eight Core SoC}
 	\begin{itemize}
-		\item Four ARM Cortex A15 operating at \@ \eqn{1.4}GHz
-		\item Eight C66x CorePacs DSP Core Subsystems \@ \eqn{1.2}GHz
-		\item 1024K Byte Local L2 Per CorePac
-		\item 6 MB MSM SRAM Memory Shared by DSP CorePacs and ARM CorePac
+		\item \blutxt{Four ARM Cortex A15} operating at \@ \eqn{1.4}GHz
+		\item \redtxt{Eight C66x CorePacs} DSP Core Subsystems \@ \eqn{1.2}GHz
+		\item \gretxt{32KB L1P and L1D Cache} + \gretxt{1024KB L2 Cache Per CorePac}
+		\item 6 MB \blutxt{Multicore Shared Memory (MSM) SRAM Memory} Shared by DSP CorePacs and ARM CorePac
 		\item TeraNet Fabric interconnect between core subsystems and peripherals
 		\item DDR3 memory interface
 	\end{itemize}
@@ -158,7 +132,7 @@
 		\item Computationally, SVD is the most demanding operation
 		\item SVD is performed by \blutxt{repeated QR factorization} (16 iterations)
 		\item In order to utilize the SoC efficiently, \redtxt{SVD is shared among eight C66x cores}
-		\item SVD processing begins with a \blutxt{chip level interrupt controller (CIC) interrupt} from Core(0)
+		\item SVD processing begins with a \blutxt{Chip Level Interrupt Controller (CIC) interrupt} from Core(0)
 		\item Channel matrices are \gretxt{stored in MSM SRAM memory}, which is accessible to all C66x cores
 		\item Upon completion, Core(0) carries out scheduler design until completion
 	\end{itemize}
@@ -166,11 +140,12 @@
 
 \begin{frame}{Implementation of Scheduler Algorithm}
 	\begin{itemize}
-		\item Each core runs \blutxt{separate copy of SYS-BIOS}
-		\item Inter core communication is facilitated using MCSDK 3.0 software stack
+		\item Each core runs \blutxt{separate copy of SYS-BIOS}, \textit{i.e.}, in homogeneous Asynchronous Multiprocessing (AMP) mode
+		\item Inter core communication is facilitated using multi-core SDK 3.0 software stack
 		\item Storage address of the channel buffer in MSM SRAM is fixed across cores using \gretxt{\textrm{\#pragma location}}
-		\item \redtxt{Avoids the usage of \textit{SharedMem} and \textit{Notify} modules} to attain the same
-		\item \blutxt{\textit{IPC} module is used to synchronize} the cores upon {BIOS\_Start()} function call
+		\item \redtxt{Avoids the usage of \textit{SharedMem} and \textit{Notify} modules} to achieve the same result
+		\item \blutxt{\textit{Inter-Processor Communication (IPC)} module is used to synchronize} the cores upon {BIOS\_Start()} function call
+		\item \gretxt{\textit{IPC\_start()}} and \gretxt{\textit{IPC\_attach()}} function calls are used for multi-core synchronization
 	\end{itemize}
 \end{frame}
 
@@ -202,12 +177,12 @@
 \begin{frame}
 \begin{table} \caption{Scheduling Complexity for $K = 100$ users ($\mathrm{msec}$) with C66x operating at \eqn{1.2}GHz} \begin{center} \begin{tabular}{c c c c c c c}
 			$N_T \times N_R $ & $\lambda$ & SVD \eqn{(1)} & SVD \eqn{(8)} & Greedy   & SP          & PIPD \\ 
-			\hline \\
+			\hline
 			$8 \times 4$ & 4 & 22.68 & 2.90 & 0.075 & 0.524 & 0.469 \\ 
 			$8 \times 4$ & 2 & 22.68 & 2.90 & 0.064 & 0.325 & 0.268 \\
 			$8 \times 2$ & 2 & 6.055 & 0.79 & 0.063 & 0.325 & 0.266 \\
 			$8 \times 2$ & 1 & 6.055 & 0.79 & 0.058 & 0.226 & 0.166 \\
-			\hline \\
+			\hline
 			$4 \times 4$ & 4 & 15.81 & 2.07 & 0.045 & 0.168 & 0.167 \\ 
 			$4 \times 4$ & 2 & 15.81 & 2.07 & 0.034 & 0.102 & 0.098 \\
 			$4 \times 2$ & 2 & 4.844 & 0.64 & 0.034 & 0.102 & 0.097 \\
@@ -215,16 +190,19 @@
 			\hline \vspace{-0.3in}
 		\end{tabular} \label{table:compexity_comparison}\end{center}
 \end{table}
+\begin{itemize}
+	\item \redtxt{\eqn{\lambda}} - number of spatial streams used in scheduling method (\gretxt{only dominant streams are considered after sorting singular values})
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Conclusion from Implementation Results}
 	\begin{itemize}
 		\item \gretxt{Current design can handle all scheduling algorithms} within \eqn{0.5} msec duration
-		\item Moreover, with \blutxt{8 parallel cores}, it can \gretxt{support \eqn{8} scheduling blocks (SBs)} within \eqn{0.5} msec
-		\item However, the complexity is mainly attributed by the SVD processing
+		\item Using \blutxt{8 parallel cores} - \gretxt{support \eqn{8} scheduling blocks (SBs)} in \eqn{0.5} msec \redtxt{(well within LTE-A subframe duration of \eqn{1} msec)}
+		\item Complexity is mainly attributed by the SVD processing
 		\item With current implementation, it can \blutxt{support the MIMO configuration of \eqn{8 \times 2} system for \eqn{K = 100} users}
-		\item It is valid only \redtxt{if the channel changes onces in every radio frame} of \eqn{10} msec duration
-		\item In \eqn{4 \times 2} configuration, current implementation supports \eqn{2} SBs using earlier assumption
+		\item ZYNQ ZC702 - \redtxt{five SVD block on programming logic and scheduling block on ARM} - can support only \eqn{50} users for a \eqn{8 \times 2} system
+		\item ZYNQ ZC702 performance degradation is \blutxt{due to the clocking of programming logic - (150MHz) and ARM (667 MHz) only}
 	\end{itemize}
 \end{frame}
 
@@ -233,12 +211,41 @@
 
 \begin{frame}{Conclusions}
 \begin{itemize}
-\item We studied the implementation of different state-of-the-art MU-MIMO scheduling algorithms on TIC6636K2H
+\item We studied the implementation of different state-of-the-art MU-MIMO scheduling algorithms on TCI6636K2H
 \item Complexity is mainly attributed to SVD decomposition of channel matrices
 \item Using parallel implementation, current design can support \eqn{100} SVD of \eqn{8 \times 2} matrices in \eqn{6.055} msec
 \item We have demonstrated that with the current implementation, \blutxt{all scheduling schemes meet the real-time requirements}
 \item Even though we considered only single SB, the above implementation is scalable.
 \end{itemize}
 \end{frame}
+
+\section{Backup}
+
+\subsection{Successive Projections}
+
+\begin{frame}{Successive Projections\eqn{^\dagger}}
+	\begin{itemize}
+		\item Based on \redtxt{Gram-Schmidt Orthogonalization} Procedure
+		\item In each iteration, user channel vectors are projected on to the subspace orthogonal to the span of channel vectors already chosen
+		\item Upon \blutxt{projecting on to the orthogonal subspace}, resulting vector with maximum norm is chosen as the candidate user
+		\[\mbf{N}(\mathcal{A}) = \mbf{I}_{N_T} - \mbf{F} \left (\mbf{F}^\herm \mbf{F} \right )^{-1} \mbf{F}^\herm\]
+		\item where \eqn{\mbf{F}} is the matrix formed by stacking channel vector of already chosen users in \eqn{\mc{A}}
+	\end{itemize}
+	\eqn{^\dagger}\scriptsize{T. Yoo and A. Goldsmith, "{On the Optimality of Multi-Antenna Broadcast Scheduling using zero-forcing Beamforming},” in \emph{IEEE J. Sel. Areas Commun.}, vol. 24, no. 3. IEEE, march 2006.}
+\end{frame}
+
+\subsection{Product of Independent Projections}
+
+\begin{frame}{Product of Independent Projections (PIPD)\eqn{^\dagger}}
+	\begin{itemize}
+		\item As compared to the subspace projection in previous algorithm, \blutxt{vector projections} are considered
+		\item Each user channel is projected on to unit vector in the direction of already chosen users channel
+		\item Selection is based on the product of independent vector projections
+		\item Performs significantly closer to successive projections method
+		\item Due to vector projections, inverse calculation is not required - \redtxt{low complexity}
+	\end{itemize}
+	\eqn{^\dagger}\scriptsize{Venkatraman, G., Tolli, A., Janhunen, J., and Juntti, M. "Low Complexity Multi-User MIMO Scheduling for Weighted Sum Rate Maximization", in \emph{Proc. of European Signal Process. Conference (EUSIPCO)}, pp. 820--824, 2013}
+\end{frame}
+
 
 \end{document}
